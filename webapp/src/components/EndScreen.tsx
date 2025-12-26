@@ -54,3 +54,4 @@ export function EndScreen({ score, time, totalQuotes, leaderboard, onRestart }: 
   );
 }
 
+

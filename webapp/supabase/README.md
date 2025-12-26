@@ -72,3 +72,4 @@ Current RLS policies allow public read/write. For production:
 - Restrict policies by user_id or game_id
 - Add rate limiting
 
+

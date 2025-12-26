@@ -159,3 +159,4 @@ The migration creates these tables:
 - Monitor Realtime usage in Supabase dashboard
 - Set up authentication if needed for production
 
+

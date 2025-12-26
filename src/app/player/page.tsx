@@ -6,3 +6,4 @@ export default function PlayerPage() {
   return <GameExperience defaultRole="player" />;
 }
 
+
