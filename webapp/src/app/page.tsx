@@ -252,7 +252,7 @@ export function GameExperience({
 
     const isUserPiece = quote.type === "user-entry";
     const isCorrect = isUserPiece ? phase === "incubation" : quote.phase === phase;
-    notify(isCorrect ? "Nice drop!" : "Try another phase");
+    notify(isCorrect ? "success" : "error", isCorrect ? "Nice drop!" : "Try another phase");
 
     if (player) {
       emitPlacement({
