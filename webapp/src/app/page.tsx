@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { quotes, phaseTitles } from "@/data/quotes";
 import { pieceMap, defaultPiece } from "@/data/pieceMap";
@@ -652,5 +652,9 @@ export function GameExperience({
 }
 
 export default function Page() {
-  return <GameExperience defaultRole="player" />;
+  return (
+    <Suspense fallback={<div className="flex min-h-screen items-center justify-center">Loading...</div>}>
+      <GameExperience defaultRole="player" />
+    </Suspense>
+  );
 }
