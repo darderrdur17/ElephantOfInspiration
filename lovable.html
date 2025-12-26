@@ -1,0 +1,1233 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta http-equiv="content-type" content="text/html; charset=utf-8"/>
+	<title></title>
+	<meta name="generator" content="LibreOffice 25.2.3.2 (Linux)"/>
+	<meta name="created" content="00:00:00"/>
+	<meta name="changed" content="00:00:00"/>
+	<style type="text/css">
+		@page { size: 8.27in 11.69in; margin: 1in }
+		p { margin-bottom: 0.1in; line-height: 115%; background: transparent }
+	</style>
+</head>
+<body lang="en-US" link="#000080" vlink="#800000" dir="ltr"><p style="line-height: 100%; margin-bottom: 0in">
+<font color="#000000"><font face="Helvetica, serif"><font size="3" style="font-size: 12pt">import
+{ useState, useEffect } from &quot;react&quot;;</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"><font face="Helvetica, serif"><font size="3" style="font-size: 12pt">import
+{ quotes } from &quot;@/data/quotes&quot;;</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"><font face="Helvetica, serif"><font size="3" style="font-size: 12pt">import
+{ Quote, PhaseTitle, GameState, PlayerScore } from &quot;@/types/game&quot;;</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"><font face="Helvetica, serif"><font size="3" style="font-size: 12pt">import
+{ StartScreen } from &quot;@/components/StartScreen&quot;;</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"><font face="Helvetica, serif"><font size="3" style="font-size: 12pt">import
+{ EndScreen } from &quot;@/components/EndScreen&quot;;</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"><font face="Helvetica, serif"><font size="3" style="font-size: 12pt">import
+{ QuoteCard } from &quot;@/components/QuoteCard&quot;;</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"><font face="Helvetica, serif"><font size="3" style="font-size: 12pt">import
+{ Timer } from &quot;@/components/Timer&quot;;</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"><font face="Helvetica, serif"><font size="3" style="font-size: 12pt">import
+{ PuzzleBoard } from &quot;@/components/PuzzleBoard&quot;;</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"><font face="Helvetica, serif"><font size="3" style="font-size: 12pt">import
+{ toast } from &quot;sonner&quot;;</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"><font face="Helvetica, serif"><font size="3" style="font-size: 12pt">import
+{ Button } from &quot;@/components/ui/button&quot;;</font></font></font></p>
+<p style="margin-bottom: 0in; line-height: 100%"><br/>
+
+</p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"><font face="Helvetica, serif"><font size="3" style="font-size: 12pt">const
+phaseTitles: PhaseTitle[] = [</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+  <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">{
+id: &quot;title-preparation&quot;, title: &quot;Preparation&quot;,
+phase: &quot;preparation&quot; },</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+  <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">{
+id: &quot;title-incubation&quot;, title: &quot;Incubation&quot;,
+phase: &quot;incubation&quot; },</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+  <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">{
+id: &quot;title-illumination&quot;, title: &quot;Illumination&quot;,
+phase: &quot;illumination&quot; },</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+  <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">{
+id: &quot;title-verification&quot;, title: &quot;Verification&quot;,
+phase: &quot;verification&quot; },</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"><font face="Helvetica, serif"><font size="3" style="font-size: 12pt">];</font></font></font></p>
+<p style="margin-bottom: 0in; line-height: 100%"><br/>
+
+</p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"><font face="Helvetica, serif"><font size="3" style="font-size: 12pt">const
+Index = () =&gt; {</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+  <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">const
+[gameState, setGameState] = useState&lt;GameState&gt;({</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+      <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">isStarted:
+false,</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+      <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">isCompleted:
+false,</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+      <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">startTime:
+null,</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+      <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">endTime:
+null,</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+      <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">userAnswer:
+&quot;&quot;,</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+      <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">placements:
+{},</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+      <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">titlePlacements:
+{},</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+  <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">});</font></font></font></p>
+<p style="margin-bottom: 0in; line-height: 100%"><br/>
+
+</p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+  <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">const
+[playerName, setPlayerName] = useState(&quot;&quot;);</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+  <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">const
+[availableQuotes, setAvailableQuotes] = useState&lt;Quote[]&gt;([]);</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+  <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">const
+[availableTitles, setAvailableTitles] = useState&lt;PhaseTitle[]&gt;([]);</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+  <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">const
+[placedQuotes, setPlacedQuotes] = useState&lt;Record&lt;string,
+Quote[]&gt;&gt;({</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+      <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">preparation:
+[],</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+      <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">incubation:
+[],</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+      <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">illumination:
+[],</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+      <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">verification:
+[],</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+  <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">});</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+  <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">const
+[placedTitles, setPlacedTitles] = useState&lt;Record&lt;string,
+PhaseTitle | null&gt;&gt;({</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+      <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">preparation:
+null,</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+      <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">incubation:
+null,</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+      <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">illumination:
+null,</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+      <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">verification:
+null,</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+  <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">});</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+  <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">const
+[draggedQuote, setDraggedQuote] = useState&lt;Quote | null&gt;(null);</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+  <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">const
+[draggedTitle, setDraggedTitle] = useState&lt;PhaseTitle |
+null&gt;(null);</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+  <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">const
+[highlightedZone, setHighlightedZone] = useState&lt;string |
+null&gt;(null);</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+  <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">const
+[leaderboard, setLeaderboard] = useState&lt;PlayerScore[]&gt;([]);</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+  <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">const
+[userPuzzlePiece, setUserPuzzlePiece] = useState&lt;Quote |
+null&gt;(null);</font></font></font></p>
+<p style="margin-bottom: 0in; line-height: 100%"><br/>
+
+</p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+  <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">useEffect(()
+=&gt; {</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+      <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">//
+Load leaderboard from session storage</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+      <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">const
+stored = sessionStorage.getItem(&quot;creativity-leaderboard&quot;);</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+      <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">if
+(stored) {</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+          <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">setLeaderboard(JSON.parse(stored));</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+      <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">}</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+  <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">},
+[]);</font></font></font></p>
+<p style="margin-bottom: 0in; line-height: 100%"><br/>
+
+</p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+  <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">const
+handleStart = (name: string, answer: string) =&gt; {</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+      <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">//
+Create user's puzzle piece for incubation phase</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+      <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">const
+userQuote: Quote = {</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+          <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">id:
+&quot;user-answer&quot;,</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+          <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">text:
+answer,</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+          <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">author:
+name,</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+          <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">phase:
+&quot;incubation&quot;,</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+      <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">};</font></font></font></p>
+<p style="margin-bottom: 0in; line-height: 100%"><br/>
+
+</p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+      <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">setPlayerName(name);</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+      <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">setUserPuzzlePiece(userQuote);</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+      <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">setAvailableQuotes([...quotes]);</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+      <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">setAvailableTitles([...phaseTitles]);</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+      <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">setGameState({</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+          <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">isStarted:
+true,</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+          <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">isCompleted:
+false,</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+          <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">startTime:
+Date.now(),</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+          <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">endTime:
+null,</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+          <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">userAnswer:
+answer,</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+          <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">placements:
+{},</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+          <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">titlePlacements:
+{},</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+      <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">});</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+      </font>
+</p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+      <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">toast.success(&quot;Game
+started! Drag titles and quotes to the correct birds.&quot;);</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+  <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">};</font></font></font></p>
+<p style="margin-bottom: 0in; line-height: 100%"><br/>
+
+</p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+  <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">const
+handleDragStart = (quote: Quote) =&gt; {</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+      <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">setDraggedQuote(quote);</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+      <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">setDraggedTitle(null);</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+  <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">};</font></font></font></p>
+<p style="margin-bottom: 0in; line-height: 100%"><br/>
+
+</p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+  <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">const
+handleDragStartTitle = (title: PhaseTitle) =&gt; {</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+      <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">setDraggedTitle(title);</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+      <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">setDraggedQuote(null);</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+  <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">};</font></font></font></p>
+<p style="margin-bottom: 0in; line-height: 100%"><br/>
+
+</p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+  <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">const
+handleDragEnd = () =&gt; {</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+      <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">setDraggedQuote(null);</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+      <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">setDraggedTitle(null);</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+      <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">setHighlightedZone(null);</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+  <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">};</font></font></font></p>
+<p style="margin-bottom: 0in; line-height: 100%"><br/>
+
+</p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+  <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">const
+handleDragOver = (e: React.DragEvent, zone: string) =&gt; {</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+      <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">e.preventDefault();</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+      <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">setHighlightedZone(zone);</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+  <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">};</font></font></font></p>
+<p style="margin-bottom: 0in; line-height: 100%"><br/>
+
+</p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+  <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">const
+handleDrop = (phase: string) =&gt; {</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+      <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">if
+(draggedTitle) {</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+          <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">//
+Handle title drop</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+          <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">setAvailableTitles(prev
+=&gt; prev.filter(t =&gt; t.id !== draggedTitle.id));</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+          </font>
+</p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+          <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">setPlacedTitles(prev
+=&gt; {</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+              <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">const
+newPlacements = { ...prev };</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+              </font>
+</p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+              <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">//
+Remove from any previous zone</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+              <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">Object.keys(newPlacements).forEach(key
+=&gt; {</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+                  <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">if
+(newPlacements[key]?.id === draggedTitle.id) {</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+                      <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">newPlacements[key]
+= null;</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+                  <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">}</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+              <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">});</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+              </font>
+</p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+              <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">//
+Add to new zone</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+              <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">newPlacements[phase]
+= draggedTitle;</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+              </font>
+</p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+              <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">return
+newPlacements;</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+          <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">});</font></font></font></p>
+<p style="margin-bottom: 0in; line-height: 100%"><br/>
+
+</p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+          <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">setGameState(prev
+=&gt; ({</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+              <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">...prev,</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+              <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">titlePlacements:
+{</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+                  <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">...prev.titlePlacements,</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+                  <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">[draggedTitle.id]:
+phase,</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+              <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">},</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+          <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">}));</font></font></font></p>
+<p style="margin-bottom: 0in; line-height: 100%"><br/>
+
+</p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+          <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">setDraggedTitle(null);</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+          <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">setHighlightedZone(null);</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+          <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">return;</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+      <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">}</font></font></font></p>
+<p style="margin-bottom: 0in; line-height: 100%"><br/>
+
+</p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+      <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">if
+(!draggedQuote) return;</font></font></font></p>
+<p style="margin-bottom: 0in; line-height: 100%"><br/>
+
+</p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+      <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">//
+Remove from available or previous placement</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+      <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">setAvailableQuotes(prev
+=&gt; prev.filter(q =&gt; q.id !== draggedQuote.id));</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+      </font>
+</p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+      <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">setPlacedQuotes(prev
+=&gt; {</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+          <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">const
+newPlacements = { ...prev };</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+          </font>
+</p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+          <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">//
+Remove from any previous zone</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+          <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">Object.keys(newPlacements).forEach(key
+=&gt; {</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+              <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">newPlacements[key]
+= newPlacements[key].filter(q =&gt; q.id !== draggedQuote.id);</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+          <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">});</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+          </font>
+</p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+          <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">//
+Add to new zone</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+          <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">newPlacements[phase]
+= [...newPlacements[phase], draggedQuote];</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+          </font>
+</p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+          <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">return
+newPlacements;</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+      <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">});</font></font></font></p>
+<p style="margin-bottom: 0in; line-height: 100%"><br/>
+
+</p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+      <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">setGameState(prev
+=&gt; ({</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+          <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">...prev,</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+          <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">placements:
+{</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+              <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">...prev.placements,</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+              <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">[draggedQuote.id]:
+phase,</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+          <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">},</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+      <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">}));</font></font></font></p>
+<p style="margin-bottom: 0in; line-height: 100%"><br/>
+
+</p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+      <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">setDraggedQuote(null);</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+      <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">setHighlightedZone(null);</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+  <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">};</font></font></font></p>
+<p style="margin-bottom: 0in; line-height: 100%"><br/>
+
+</p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+  <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">const
+handleDropUserPiece = (phase: string) =&gt; {</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+      <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">if
+(userPuzzlePiece &amp;&amp; !gameState.placements[&quot;user-answer&quot;])
+{</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+          <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">setPlacedQuotes(prev
+=&gt; ({</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+              <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">...prev,</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+              <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">[phase]:
+[...prev[phase], userPuzzlePiece],</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+          <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">}));</font></font></font></p>
+<p style="margin-bottom: 0in; line-height: 100%"><br/>
+
+</p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+          <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">setGameState(prev
+=&gt; ({</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+              <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">...prev,</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+              <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">placements:
+{</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+                  <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">...prev.placements,</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+                  <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">&quot;user-answer&quot;:
+phase,</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+              <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">},</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+          <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">}));</font></font></font></p>
+<p style="margin-bottom: 0in; line-height: 100%"><br/>
+
+</p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+          <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">setUserPuzzlePiece(null);</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+          <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">toast.success(&quot;Great!
+Now sort the rest of the quotes.&quot;);</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+      <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">}</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+  <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">};</font></font></font></p>
+<p style="margin-bottom: 0in; line-height: 100%"><br/>
+
+</p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+  <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">const
+checkCompletion = () =&gt; {</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+      <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">const
+totalItems = quotes.length + 1 + phaseTitles.length; // +1 for user
+piece, +4 for titles</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+      <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">const
+placedCount = Object.keys(gameState.placements).length +
+Object.keys(gameState.titlePlacements).length;</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+      </font>
+</p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+      <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">if
+(placedCount === totalItems &amp;&amp; !gameState.isCompleted) {</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+          <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">const
+endTime = Date.now();</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+          <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">const
+totalTime = endTime - (gameState.startTime || endTime);</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+          </font>
+</p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+          <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">//
+Calculate score</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+          <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">let
+correctCount = 0;</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+          <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">quotes.forEach(quote
+=&gt; {</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+              <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">if
+(gameState.placements[quote.id] === quote.phase) {</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+                  <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">correctCount++;</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+              <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">}</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+          <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">});</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+          </font>
+</p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+          <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">//
+Check titles</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+          <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">phaseTitles.forEach(title
+=&gt; {</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+              <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">if
+(gameState.titlePlacements[title.id] === title.phase) {</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+                  <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">correctCount++;</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+              <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">}</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+          <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">});</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+          </font>
+</p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+          <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">//
+User piece should be in incubation</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+          <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">if
+(gameState.placements[&quot;user-answer&quot;] === &quot;incubation&quot;)
+{</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+              <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">correctCount++;</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+          <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">}</font></font></font></p>
+<p style="margin-bottom: 0in; line-height: 100%"><br/>
+
+</p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+          <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">//
+Update leaderboard</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+          <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">const
+newScore: PlayerScore = {</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+              <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">name:
+playerName,</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+              <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">score:
+correctCount,</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+              <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">time:
+totalTime,</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+              <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">timestamp:
+Date.now(),</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+          <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">};</font></font></font></p>
+<p style="margin-bottom: 0in; line-height: 100%"><br/>
+
+</p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+          <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">const
+updatedLeaderboard = [...leaderboard, newScore]</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+              <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">.sort((a,
+b) =&gt; {</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+                  <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">if
+(b.score !== a.score) return b.score - a.score;</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+                  <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">return
+a.time - b.time;</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+              <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">})</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+              <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">.slice(0,
+10);</font></font></font></p>
+<p style="margin-bottom: 0in; line-height: 100%"><br/>
+
+</p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+          <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">setLeaderboard(updatedLeaderboard);</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+          <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">sessionStorage.setItem(&quot;creativity-leaderboard&quot;,
+JSON.stringify(updatedLeaderboard));</font></font></font></p>
+<p style="margin-bottom: 0in; line-height: 100%"><br/>
+
+</p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+          <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">setGameState(prev
+=&gt; ({</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+              <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">...prev,</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+              <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">isCompleted:
+true,</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+              <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">endTime,</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+          <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">}));</font></font></font></p>
+<p style="margin-bottom: 0in; line-height: 100%"><br/>
+
+</p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+          <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">setTimeout(()
+=&gt; {</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+              <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">toast.success(`Puzzle
+complete! ${correctCount}/${totalItems} correct!`);</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+          <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">},
+2000);</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+      <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">}</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+  <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">};</font></font></font></p>
+<p style="margin-bottom: 0in; line-height: 100%"><br/>
+
+</p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+  <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">useEffect(()
+=&gt; {</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+      <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">if
+(gameState.isStarted) {</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+          <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">checkCompletion();</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+      <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">}</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+  <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">},
+[gameState.placements]);</font></font></font></p>
+<p style="margin-bottom: 0in; line-height: 100%"><br/>
+
+</p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+  <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">const
+handleRestart = () =&gt; {</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+      <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">setGameState({</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+          <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">isStarted:
+false,</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+          <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">isCompleted:
+false,</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+          <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">startTime:
+null,</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+          <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">endTime:
+null,</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+          <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">userAnswer:
+&quot;&quot;,</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+          <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">placements:
+{},</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+          <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">titlePlacements:
+{},</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+      <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">});</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+      <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">setAvailableQuotes([]);</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+      <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">setAvailableTitles([]);</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+      <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">setPlacedQuotes({</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+          <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">preparation:
+[],</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+          <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">incubation:
+[],</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+          <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">illumination:
+[],</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+          <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">verification:
+[],</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+      <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">});</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+      <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">setPlacedTitles({</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+          <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">preparation:
+null,</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+          <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">incubation:
+null,</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+          <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">illumination:
+null,</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+          <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">verification:
+null,</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+      <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">});</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+      <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">setPlayerName(&quot;&quot;);</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+      <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">setUserPuzzlePiece(null);</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+  <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">};</font></font></font></p>
+<p style="margin-bottom: 0in; line-height: 100%"><br/>
+
+</p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+  <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">if
+(!gameState.isStarted) {</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+      <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">return
+&lt;StartScreen onStart={handleStart} /&gt;;</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+  <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">}</font></font></font></p>
+<p style="margin-bottom: 0in; line-height: 100%"><br/>
+
+</p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+  <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">if
+(gameState.isCompleted) {</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+      <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">let
+score = Object.keys(gameState.placements).filter(id =&gt; {</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+          <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">if
+(id === &quot;user-answer&quot;) return gameState.placements[id] ===
+&quot;incubation&quot;;</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+          <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">const
+quote = quotes.find(q =&gt; q.id === id);</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+          <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">return
+quote &amp;&amp; gameState.placements[id] === quote.phase;</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+      <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">}).length;</font></font></font></p>
+<p style="margin-bottom: 0in; line-height: 100%"><br/>
+
+</p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+      <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">//
+Add title scores</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+      <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">score
++= Object.keys(gameState.titlePlacements).filter(id =&gt; {</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+          <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">const
+title = phaseTitles.find(t =&gt; t.id === id);</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+          <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">return
+title &amp;&amp; gameState.titlePlacements[id] === title.phase;</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+      <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">}).length;</font></font></font></p>
+<p style="margin-bottom: 0in; line-height: 100%"><br/>
+
+</p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+      <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">return
+(</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+          <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">&lt;EndScreen</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+              <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">score={score}</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+              <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">time={gameState.endTime!
+- gameState.startTime!}</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+              <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">totalQuotes={quotes.length
++ 1 + phaseTitles.length}</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+              <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">onRestart={handleRestart}</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+              <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">leaderboard={leaderboard}</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+          <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">/&gt;</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+      <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">);</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+  <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">}</font></font></font></p>
+<p style="margin-bottom: 0in; line-height: 100%"><br/>
+
+</p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+  <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">//
+Calculate correct placements for puzzle progress</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+  <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">let
+correctPlacements = Object.keys(gameState.placements).filter(id =&gt;
+{</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+      <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">if
+(id === &quot;user-answer&quot;) return gameState.placements[id] ===
+&quot;incubation&quot;;</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+      <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">const
+quote = quotes.find(q =&gt; q.id === id);</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+      <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">return
+quote &amp;&amp; gameState.placements[id] === quote.phase;</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+  <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">}).length;</font></font></font></p>
+<p style="margin-bottom: 0in; line-height: 100%"><br/>
+
+</p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+  <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">//
+Add correct title placements</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+  <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">correctPlacements
++= Object.keys(gameState.titlePlacements).filter(id =&gt; {</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+      <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">const
+title = phaseTitles.find(t =&gt; t.id === id);</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+      <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">return
+title &amp;&amp; gameState.titlePlacements[id] === title.phase;</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+  <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">}).length;</font></font></font></p>
+<p style="margin-bottom: 0in; line-height: 100%"><br/>
+
+</p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+  <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">return
+(</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+      <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">&lt;div
+className=&quot;min-h-screen p-8&quot;&gt;</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+          <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">&lt;div
+className=&quot;max-w-7xl mx-auto space-y-6&quot;&gt;</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+              <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">&lt;div
+className=&quot;flex items-center justify-between&quot;&gt;</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+                  <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">&lt;div&gt;</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+                      <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">&lt;h1
+className=&quot;text-4xl font-bold text-foreground mb-2&quot;&gt;</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+                          <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">Creativity
+is...</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+                      <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">&lt;/h1&gt;</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+                      <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">&lt;p
+className=&quot;text-lg text-muted-foreground&quot;&gt;</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+                          <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">Sort
+the quotes into the correct creative phases</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+                      <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">&lt;/p&gt;</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+                  <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">&lt;/div&gt;</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+                  <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">&lt;Timer
+startTime={gameState.startTime} isCompleted={gameState.isCompleted}
+/&gt;</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+              <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">&lt;/div&gt;</font></font></font></p>
+<p style="margin-bottom: 0in; line-height: 100%"><br/>
+
+</p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+              <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">&lt;div
+className=&quot;flex gap-6 items-start&quot;&gt;</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+                  <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">{/*
+Items sidebar */}</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+                  <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">&lt;div
+className=&quot;w-80 flex-shrink-0 space-y-4&quot;&gt;</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+                      <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">{/*
+Phase titles to sort */}</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+                      <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">{availableTitles.length
+&gt; 0 &amp;&amp; (</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+                          <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">&lt;div
+className=&quot;bg-accent/20 border-2 border-accent rounded-xl p-4&quot;&gt;</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+                              <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">&lt;h3
+className=&quot;text-sm font-bold text-foreground mb-2&quot;&gt;</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+                                 
+<font face="Helvetica, serif"><font size="3" style="font-size: 12pt">Phase
+Titles ({availableTitles.length})</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+                              <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">&lt;/h3&gt;</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+                              <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">&lt;p
+className=&quot;text-xs text-muted-foreground mb-3&quot;&gt;</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+                                 
+<font face="Helvetica, serif"><font size="3" style="font-size: 12pt">Drag
+titles to the correct birds first</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+                              <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">&lt;/p&gt;</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+                              <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">&lt;div
+className=&quot;space-y-2&quot;&gt;</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+                                 
+<font face="Helvetica, serif"><font size="3" style="font-size: 12pt">{availableTitles.map((title)
+=&gt; (</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+                                   
+  <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">&lt;div</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+                                   
+      <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">key={title.id}</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+                                   
+      <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">draggable</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+                                   
+      <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">onDragStart={()
+=&gt; handleDragStartTitle(title)}</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+                                   
+      <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">onDragEnd={handleDragEnd}</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+                                   
+      <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">className=&quot;cursor-move
+bg-accent/30 border-2 border-accent rounded-lg p-3 text-center
+font-bold hover:bg-accent/40 transition-colors&quot;</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+                                   
+      <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">style={{
+opacity: draggedTitle?.id === title.id ? 0.5 : 1 }}</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+                                   
+  <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">&gt;</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+                                   
+      <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">{title.title}</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+                                   
+  <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">&lt;/div&gt;</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+                                 
+<font face="Helvetica, serif"><font size="3" style="font-size: 12pt">))}</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+                              <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">&lt;/div&gt;</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+                          <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">&lt;/div&gt;</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+                      <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">)}</font></font></font></p>
+<p style="margin-bottom: 0in; line-height: 100%"><br/>
+
+</p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+                      <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">{/*
+User's puzzle piece (before placement) */}</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+                      <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">{userPuzzlePiece
+&amp;&amp; (</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+                          <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">&lt;div
+className=&quot;bg-primary/10 border-2 border-primary rounded-xl
+p-4&quot;&gt;</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+                              <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">&lt;h3
+className=&quot;text-sm font-bold text-primary mb-3&quot;&gt;</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+                                 
+<font face="Helvetica, serif"><font size="3" style="font-size: 12pt">Your
+Creative Moment</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+                              <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">&lt;/h3&gt;</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+                              <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">&lt;div</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+                                 
+<font face="Helvetica, serif"><font size="3" style="font-size: 12pt">draggable</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+                                 
+<font face="Helvetica, serif"><font size="3" style="font-size: 12pt">onDragStart={()
+=&gt; setDraggedQuote(userPuzzlePiece)}</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+                                 
+<font face="Helvetica, serif"><font size="3" style="font-size: 12pt">onDragEnd={handleDragEnd}</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+                                 
+<font face="Helvetica, serif"><font size="3" style="font-size: 12pt">className=&quot;cursor-move&quot;</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+                              <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">&gt;</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+                                 
+<font face="Helvetica, serif"><font size="3" style="font-size: 12pt">&lt;QuoteCard</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+                                   
+  <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">quote={userPuzzlePiece}</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+                                   
+  <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">isDragging={draggedQuote?.id
+=== userPuzzlePiece.id}</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+                                 
+<font face="Helvetica, serif"><font size="3" style="font-size: 12pt">/&gt;</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+                              <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">&lt;/div&gt;</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+                          <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">&lt;/div&gt;</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+                      <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">)}</font></font></font></p>
+<p style="margin-bottom: 0in; line-height: 100%"><br/>
+
+</p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+                      <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">{/*
+Available quotes to sort */}</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+                      <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">{availableQuotes.length
+&gt; 0 &amp;&amp; (</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+                          <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">&lt;div
+className=&quot;bg-card/50 rounded-xl p-4 border-2 border-border
+max-h-[500px] overflow-y-auto&quot;&gt;</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+                              <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">&lt;h3
+className=&quot;text-sm font-bold text-foreground mb-2&quot;&gt;</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+                                 
+<font face="Helvetica, serif"><font size="3" style="font-size: 12pt">Quotes
+to Sort ({availableQuotes.length})</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+                              <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">&lt;/h3&gt;</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+                              <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">&lt;p
+className=&quot;text-xs text-muted-foreground mb-3&quot;&gt;</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+                                 
+<font face="Helvetica, serif"><font size="3" style="font-size: 12pt">Drag
+to the correct bird</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+                              <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">&lt;/p&gt;</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+                              <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">&lt;div
+className=&quot;space-y-2 pr-2&quot;&gt;</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+                                 
+<font face="Helvetica, serif"><font size="3" style="font-size: 12pt">{availableQuotes.map((quote)
+=&gt; (</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+                                   
+  <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">&lt;div</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+                                   
+      <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">key={quote.id}</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+                                   
+      <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">draggable</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+                                   
+      <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">onDragStart={()
+=&gt; handleDragStart(quote)}</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+                                   
+      <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">onDragEnd={handleDragEnd}</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+                                   
+      <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">className=&quot;cursor-move&quot;</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+                                   
+  <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">&gt;</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+                                   
+      <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">&lt;QuoteCard</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+                                   
+          <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">quote={quote}</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+                                   
+          <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">isDragging={draggedQuote?.id
+=== quote.id}</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+                                   
+      <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">/&gt;</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+                                   
+  <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">&lt;/div&gt;</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+                                 
+<font face="Helvetica, serif"><font size="3" style="font-size: 12pt">))}</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+                              <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">&lt;/div&gt;</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+                          <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">&lt;/div&gt;</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+                      <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">)}</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+                  <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">&lt;/div&gt;</font></font></font></p>
+<p style="margin-bottom: 0in; line-height: 100%"><br/>
+
+</p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+                  <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">{/*
+Interactive Jigsaw Puzzle Board */}</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+                  <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">&lt;div
+className=&quot;flex-1&quot;&gt;</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+                      <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">&lt;PuzzleBoard
+</font></font></font>
+</p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+                         
+<font face="Helvetica, serif"><font size="3" style="font-size: 12pt">correctPlacements={correctPlacements}</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+                         
+<font face="Helvetica, serif"><font size="3" style="font-size: 12pt">totalPieces={quotes.length
++ 1 + phaseTitles.length}</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+                         
+<font face="Helvetica, serif"><font size="3" style="font-size: 12pt">placedQuotes={placedQuotes}</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+                         
+<font face="Helvetica, serif"><font size="3" style="font-size: 12pt">placedTitles={placedTitles}</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+                         
+<font face="Helvetica, serif"><font size="3" style="font-size: 12pt">onDrop={userPuzzlePiece
+&amp;&amp; draggedQuote?.id === &quot;user-answer&quot; ?
+handleDropUserPiece : handleDrop}</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+                         
+<font face="Helvetica, serif"><font size="3" style="font-size: 12pt">onDragOver={handleDragOver}</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+                         
+<font face="Helvetica, serif"><font size="3" style="font-size: 12pt">highlightedZone={highlightedZone}</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+                         
+<font face="Helvetica, serif"><font size="3" style="font-size: 12pt">onDragStart={handleDragStart}</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+                         
+<font face="Helvetica, serif"><font size="3" style="font-size: 12pt">onDragStartTitle={handleDragStartTitle}</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+                         
+<font face="Helvetica, serif"><font size="3" style="font-size: 12pt">onDragEnd={handleDragEnd}</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+                         
+<font face="Helvetica, serif"><font size="3" style="font-size: 12pt">draggedQuote={draggedQuote}</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+                         
+<font face="Helvetica, serif"><font size="3" style="font-size: 12pt">draggedTitle={draggedTitle}</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+                      <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">/&gt;</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+                  <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">&lt;/div&gt;</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+              <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">&lt;/div&gt;</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+          <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">&lt;/div&gt;</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+      <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">&lt;/div&gt;</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"> 
+  <font face="Helvetica, serif"><font size="3" style="font-size: 12pt">);</font></font></font></p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"><font face="Helvetica, serif"><font size="3" style="font-size: 12pt">};</font></font></font></p>
+<p style="margin-bottom: 0in; line-height: 100%"><br/>
+
+</p>
+<p style="line-height: 100%; margin-bottom: 0in"><font color="#000000"><font face="Helvetica, serif"><font size="3" style="font-size: 12pt">export
+default Index;</font></font></font></p>
+</body>
+</html>
